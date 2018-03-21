@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Track APi Service</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!--<link rel="stylesheet" href="custom.css">-->
+</head>
+<body>
+
+<div>
+    <div class="container">
+        <div class="row" id="apiCall">
+            <div class="col-md-6">
+                    <h1 v-show="flag"> {{helpertext}} </h1>
+
+                    <ul class="list-group">
+                            <div class="list-group-item" v-for="(value, key) in allCouriers">
+                                    {{ key }}: {{ value }}
+                                  </div>
+                    </ul>
+                <button class="btn btn-primary" @click="getAllCouriers()" >Click me</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script>
+
+    var apiCall = new Vue ({
+        el: '#apiCall',
+        data: {
+           allCouriers:'',
+           helpertext:'Loading ...',
+           flag:false 
+        },
+        methods:{
+            getAllCouriers: function(){
+                var app = this;
+                app.flag=true;
+                app.allCouriers="";
+                axios.get("https://api.aftership.com/v4/couriers/all",{ 'headers': { "aftership-api-key":" here paste your private key",
+                    "Content-Type":"application/json" } })
+                .then(function(response){
+                    app.allCouriers= response.data.data.couriers;
+                    console.log( " working ..."+app.allCouriers) ;
+                    app.flag=false;
+                })
+                .catch(function(error){
+                    console.log( " We have an error" + error) ;
+                    app.allCouriers="error"
+                });
+                
+            }
+        }
+        
+    })
+
+</script>
+</html>
+    
