@@ -1,31 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Track APi Service</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+
     <!--<link rel="stylesheet" href="custom.css">-->
 </head>
+
 <body>
 
-<div>
-    <div class="container">
-        <div class="row" id="apiCall">
-            <div class="col-md-6">
-                    <h1 v-show="flag"> {{helpertext}} </h1>
+    <div>
+        <div class="container-fluid">
+            <!-- Jumbotron Fluid-->
+            <div class="jumbotron jumbotron-fluid">
+                <div class="container">
+                    <h1 class="display-4">Courier Tracker App</h1>
+                    <p class="lead">This is a App that using Vue.js</p>
+                </div>
+            </div>
+
+
+            <div class="row" id="apiCall">
+                <div class="col-md-6">
+                    <h1>Explore full list of couriers</h1>
+                    <h2 v-show="flag"> {{helpertext}} </h2>
 
                     <ul class="list-group">
-                            <div class="list-group-item" v-for="(value, key) in allCouriers">
-                                    {{ key }}: {{ value }}
-                                  </div>
+                        <div class="list-group-item" v-for="(value, key) in allCouriers">
+                            {{ key }}: {{ value }}
+                            <h2>{{value.name}} {{value.web_url}}</h2>
+                        </div>
                     </ul>
-                <button class="btn btn-primary" @click="getAllCouriers()" >Click me</button>
+                    <button class="btn btn-primary" @click="getAllCouriers()">Click me</button>
+                </div>
+                <div class="col-md-6">
+                    <h1>Find your Package</h1>
+                    <form>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">Track ID</label>
+                            <input v-model="obj.tracking.tracking_number" type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                                placeholder="Enter your Track ID">
+                            <small id="emailHelp" class="form-text text-muted">Type a valid package track Id.</small>
+                        </div>
+                        <button v-on:click.prevent="detectPackage" class="btn btn-primary">Submit</button>
+                    </form>
+                    <button v-on:click.prevent="debughelp" class="btn btn-primary">console.log</button>
+                    <ul class="list-group">
+                        <div class="list-group-item" v-for="(value, key) in test">
+                                {{ key }}: {{ value }}
+                                
+                            </div>
+                            
+                        </ul>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
@@ -33,35 +68,85 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 <script>
 
-    var apiCall = new Vue ({
+    var apiCall = new Vue({
         el: '#apiCall',
         data: {
-           allCouriers:'',
-           helpertext:'Loading ...',
-           flag:false 
+            allCouriers: '',
+            helpertext: 'Loading ...',
+            flag: false,
+
+            obj: {
+                "tracking": {
+                    "tracking_number": "906587618687",
+                    "tracking_postal_code": "DA15BU",
+                    "tracking_ship_date": "20131231",
+                    "tracking_account_number": "1234567890",
+                    "slug": [
+                        "dhl",
+                        "ups",
+                        "fedex"
+                    ]
+                }
+            },
+            test:""
+
         },
-        methods:{
-            getAllCouriers: function(){
+        computed: {
+            name: function () {
+                this.name = this.allCouriers.name;
+                return name;
+            }
+        },
+        methods: {
+            getAllCouriers: function () {
                 var app = this;
-                app.flag=true;
-                app.allCouriers="";
-                axios.get("https://api.aftership.com/v4/couriers/all",{ 'headers': { "aftership-api-key":" here paste your private key",
-                    "Content-Type":"application/json" } })
-                .then(function(response){
-                    app.allCouriers= response.data.data.couriers;
-                    console.log( " working ..."+app.allCouriers) ;
-                    app.flag=false;
+                app.flag = true;
+                app.allCouriers = "";
+                axios.get("https://api.aftership.com/v4/couriers/all", {
+                    'headers': {
+                        "aftership-api-key": "b7223c57-8c50-42c5-92f2-d49d726c3172",
+                        "Content-Type": "application/json"
+                    }
                 })
-                .catch(function(error){
-                    console.log( " We have an error" + error) ;
-                    app.allCouriers="error"
-                });
-                
+                    .then(function (response) {
+                        app.allCouriers = response.data.data.couriers;
+                        console.log(" working ..." + app.allCouriers);
+                        app.flag = false;
+                    })
+                    .catch(function (error) {
+                        console.log(" We have an error" + error);
+                        app.allCouriers = "error"
+                    });
+
+            },
+
+            detectPackage: function () {
+                var apiCall = this;
+                objT = apiCall.obj;
+                axios.post('https://api.aftership.com/v4/couriers/detect', objT, {
+                    headers: {
+                        "aftership-api-key": "b7223c57-8c50-42c5-92f2-d49d726c3172",
+                        "Content-Type": "application/json"
+                    }
+                })
+                    // .then(r => console.log('r: ', JSON.stringify(r, null, 4)))
+                    .then(function (response) {
+                        apiCall.test=response;
+                        console.log('apicall test: ', JSON.stringify(apiCall.test, null, 4))
+                    })
+                    .catch(function (error) {
+                        console.log(" We have an error" + error);
+
+                    });
+            },
+            debughelp: function () {
+                var apiCall = this;
+                console.log(JSON.stringify(apiCall.obj, null, 4));
             }
         }
-        
+
     })
 
 </script>
+
 </html>
-    
